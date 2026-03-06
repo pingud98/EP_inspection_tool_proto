@@ -57,11 +57,7 @@ def create_app(test_config=None):
         Config.KEY_PATH,
     )
     # Run the dev server with SSL for local testing
-    if not app.testing:
-        # Only start server if called directly
-        @app.before_first_request
-        def _start_server():
-            pass  # placeholder for any startup hooks
+    # Placeholder for startup hooks
 
     return app
 
