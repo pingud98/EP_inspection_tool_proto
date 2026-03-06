@@ -13,7 +13,7 @@ from config import Config
 
 # Create a new SQLAlchemy instance; it will be bound to the Flask app later
 
-db = SQLAlchemy()
+from extensions import db
 
 
 class User(UserMixin, db.Model):

@@ -70,10 +70,7 @@ def create_app(test_config=None):
 # They are defined here so that importing models before create_app does not
 # require an app context.
 
-db = SQLAlchemy()
-login_manager = LoginManager()
-login_manager.login_view = "auth.login"
-csrf = CSRFProtect()
+from extensions import db, login_manager, csrf
 
 # Import models after db is defined
 from models import User, Inspection, Photo  # noqa: E402  pylint: disable=wrong-import-position
