@@ -40,6 +40,7 @@ def create_app(test_config=None):
     # Initialise extensions
     db.init_app(app)
     login_manager.init_app(app)
+    # User loader will be set after models import
     csrf.init_app(app)
 
     # Register blueprints
@@ -76,7 +77,10 @@ login_manager.login_view = "auth.login"
 csrf = CSRFProtect()
 
 # Import models after db is defined
-from models import User, Inspection, Photo  # noqa: E402  pylint: disable=wrong-import-position
+from models import User, Inspection, Photo, load_user  # noqa: E402  pylint: disable=wrong-import-position
+
+# Set user loader
+login_manager.user_loader(load_user)
 
 # If this script is executed directly, run the development server
 if __name__ == "__main__":
