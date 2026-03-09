@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">Dashboard</h1>
+    <a href="{{ url_for('inspections.new_inspection') }}" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">New Inspection</a>
+</div>
+
+<div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reference No.</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Installation Name</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Version</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Conclusion Status</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            {% for inspection in inspections %}
+            <tr>
+                <td class="px-6 py-4 whitespace-nowrap">{{ inspection.reference_number }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ inspection.installation_name }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ inspection.location }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ inspection.inspection_date.strftime('%Y-%m-%d') }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ inspection.version }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                        {% if inspection.conclusion_status == 'ok' %}bg-green-100 text-green-800
+                        {% elif inspection.conclusion_status == 'minor' %}bg-yellow-100 text-yellow-800
+                        {% elif inspection.conclusion_status == 'major' %}bg-red-100 text-red-800
+                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {{ inspection.conclusion_status|title if inspection.conclusion_status else 'N/A' }}
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <a href="{{ url_for('inspections.view_inspection', id=inspection.id) }}" class="text-blue-600 hover:text-blue-900 mr-3">View</a>
+                    <a href="{{ url_for('inspections.edit_inspection', id=inspection.id) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

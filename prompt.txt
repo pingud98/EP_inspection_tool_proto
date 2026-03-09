@@ -1,0 +1,242 @@
+You are building a production-ready Inspection Reporting and Management web application from scratch. This is a complete restart — ignore all prior commits to the repository. Force-push the new codebase to the existing GitHub repository, overwriting all history.
+
+---
+
+## TECH STACK
+
+- Language: Python 3.11+
+- Web Framework: Flask (with Flask-Login, Flask-WTF, Flask-SQLAlchemy)
+- Database: SQLite via SQLAlchemy ORM
+- PDF Generation: WeasyPrint (A4-formatted output)
+- TLS/HTTPS: Self-signed certificate via trustme or mkcert for local hosting
+- Frontend: Jinja2 templates + Tailwind CSS (via CDN) + vanilla JS
+- Auth: Bcrypt password hashing, session-based login
+- File Storage: Local filesystem under /uploads/, referenced in DB
+
+---
+
+## PROJECT STRUCTURE
+
+inspection-app/
+├── app/
+│   ├── __init__.py
+│   ├── models.py
+│   ├── routes/
+│   │   ├── auth.py
+│   │   ├── inspections.py
+│   │   ├── admin.py
+│   │   └── export.py
+│   ├── templates/
+│   │   ├── base.html
+│   │   ├── login.html
+│   │   ├── dashboard.html
+│   │   ├── inspection_form.html
+│   │   ├── inspection_view.html
+│   │   └── admin/
+│   │       ├── users.html
+│   │       └── user_form.html
+│   ├── static/
+│   │   ├── css/
+│   │   └── js/
+│   └── utils/
+│       ├── pdf_generator.py
+│       └── security.py
+├── uploads/
+├── certs/
+├── setup.py
+├── config.py
+├── run.py
+├── requirements.txt
+└── .gitignore
+
+---
+
+## DATABASE MODELS
+
+### User
+- id, username, full_name, email, password_hash, is_admin, is_active, created_at
+
+### Inspection
+- id, installation_name, location, inspection_date, version (int, starts at 1),
+  reference_number (int), observations, conclusion_text,
+  conclusion_status (enum: ok / minor / major),
+  created_by (FK User), created_at, updated_at
+
+### InspectionInspector
+- id, inspection_id (FK), user_id (FK nullable), free_text_name (nullable)
+  (Supports both registered users and free-text names)
+
+### Photo
+- id, inspection_id (FK), filename, caption,
+  action_required (enum: none / urgent / before_next), uploaded_at
+
+---
+
+## SETUP SCRIPT (setup.py)
+
+The setup script must:
+1. Install all dependencies from requirements.txt using pip
+2. Generate a self-signed TLS certificate and key, saved to certs/
+3. Create the SQLite database and run all table migrations
+4. Prompt the admin for: username, full name, email, password (with confirmation)
+5. Create the admin account with is_admin=True
+6. Print a success message with the local HTTPS URL (e.g. https://localhost:5000)
+7. Be runnable with: python setup.py
+
+---
+
+## CORE FEATURES
+
+### Authentication
+- Login page (username + password)
+- Session-based auth with Flask-Login
+- All routes protected — redirect to login if not authenticated
+- Logout route
+- No self-registration — admin creates all accounts
+
+### Admin Panel (/admin)
+- List all users
+- Create new user (username, full name, email, password, admin toggle)
+- Edit user (change name, email, reset password, toggle active/admin)
+- Deactivate (not delete) users
+- Only accessible to is_admin=True users
+
+### Dashboard (/)
+- Table of all inspections the logged-in user has access to
+- Columns: Reference No., Installation Name, Location, Date, Version, Conclusion Status, Actions
+- Actions: View, Edit, Export PDF
+- "New Inspection" button
+
+### Inspection Form (/inspection/new and /inspection/<id>/edit)
+
+Fields:
+1. Installation Name — text input
+2. Location — text input
+3. Date of Inspection — date picker
+4. Version — auto-incremented integer (display only, not editable)
+5. Reference Number — integer input
+6. Inspector(s) — pre-filled with logged-in user's full name; allow adding more via:
+   - Dropdown of registered users
+   - Free-text field for external individuals
+   - Display as removable tags/chips
+7. Observations — large textarea
+8. Photos section:
+   - Upload multiple photos
+   - For each uploaded photo display a thumbnail
+   - Per-photo fields: caption (text), action_required (radio buttons):
+       "No action required"
+       "Urgent action required"
+       "Action required before next inspection"
+   - Ability to remove photos
+9. Conclusion section:
+   - Conclusion comments textarea
+   - Radio buttons (select exactly one):
+       OK for operation in current state
+       Minor comments — Remedial actions required for continued operation
+       Major comments — Operation suspended until resolution and satisfactory follow-up inspection
+
+Buttons:
+- New inspection: "Complete Report" → saves, sets version=1, redirects to view page
+- Edit existing: "Update Report" → saves, increments version by 1, redirects to view page
+- Cancel → returns to dashboard
+
+### Inspection View (/inspection/<id>)
+- Read-only formatted view of the report
+- Shows all fields, photos (with captions and action status), inspectors, conclusion
+- "Edit Report" button
+- "Export as PDF" button
+
+---
+
+## PDF EXPORT (/inspection/<id>/pdf)
+
+- Generated using WeasyPrint
+- Formatted for A4 pages
+- Include:
+  - App name / report title header
+  - All inspection fields in a clean two-column layout
+  - Inspector names listed
+  - Observations in a clearly delineated box
+  - Photos displayed in a grid (max 2 per row), each with caption and action status clearly labelled
+  - Conclusion section with selected status prominently displayed
+  - Footer with page number and generation timestamp
+- Flows naturally across multiple A4 pages if content requires it
+- Served as a file download: inspection_report_<ref>_v<version>.pdf
+
+---
+
+## SECURITY REQUIREMENTS
+
+- All passwords hashed with bcrypt (min cost factor 12)
+- CSRF protection on all forms via Flask-WTF
+- File uploads validated: only JPEG, PNG, GIF, WEBP accepted; max 10MB per file
+- Uploaded filenames sanitised with werkzeug.utils.secure_filename and stored with UUID prefix
+- User input escaped in all templates (Jinja2 autoescaping enabled)
+- Admin routes protected with both login_required and admin_required decorators
+- Secret key loaded from environment variable SECRET_KEY or auto-generated and saved to .env on first run
+- HTTPS enforced — Flask run with SSL context using certs from certs/
+- .env and *.db and certs/ added to .gitignore
+
+---
+
+## GITHUB INSTRUCTIONS
+
+- The repository already exists and has been initialised with prior commits
+- Completely discard all prior history
+- Use git checkout --orphan new-branch, add all files, commit, then force-push to main
+- Commit message: "Initial commit: Inspection reporting app"
+- Include a comprehensive README.md with:
+  - Project overview
+  - Requirements (Python version, OS)
+  - Setup instructions (python setup.py)
+  - How to run (python run.py)
+  - How to access (HTTPS URL)
+  - Notes on the self-signed certificate browser warning
+
+---
+
+## CODE QUALITY STANDARDS
+
+- All Python files include docstrings
+- Routes grouped into Blueprints
+- No hardcoded secrets
+- Database access only via SQLAlchemy ORM — no raw SQL
+- Error pages for 403, 404, 500
+- Flash messages for all user actions (success and error)
+- Logging to a rotating file log (logs/app.log)
+
+---
+
+## EXECUTION ORDER
+
+Build in this order:
+1. requirements.txt and config.py
+2. app/models.py
+3. app/__init__.py (app factory)
+4. Auth blueprint + templates
+5. Admin blueprint + templates
+6. Inspection blueprint + form + view templates
+7. PDF export utility + route
+8. setup.py
+9. run.py
+10. README.md
+11. .gitignore
+12. GitHub force-push
+
+Do not proceed to the next step until the current one is complete and internally consistent.
+
+---
+
+## NOTES FOR THE OPERATOR
+
+- Before running, ensure the GitHub remote URL is configured in your local repo,
+  or add it to this prompt as: "The GitHub remote URL is: https://github.com/pingud98/EP_inspection_tool_proto.git"
+
+- WeasyPrint requires system-level dependencies. Install them before running setup.py:
+  Debian/Ubuntu:  sudo apt install libpango-1.0-0 libharfbuzz0b libpangoft2-1.0-0
+  macOS:          brew install pango
+  Windows:        See https://doc.courtbouillon.org/weasyprint/stable/first_steps.html
+
+- This prompt is designed for use with continuous-claude and qwen-coder-30b.
+  If the model stalls mid-task, re-prompt with: "Continue from step N" using the
+  Execution Order numbers above.
