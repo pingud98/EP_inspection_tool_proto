@@ -1,0 +1,14 @@
+# EP Inspection Tool Prototype
+
+This is a prototype for an inspection tool that analyzes prompts for quality and effectiveness.
+
+## Inspection Criteria
+
+1. **Clarity**: Is the prompt clear and unambiguous?
+2. **Completeness**: Does it provide all necessary information?
+3. **Specificity**: Are the instructions specific enough?
+4. **Context**: Does it provide sufficient context for the task?
+
+## Example Prompt
+
+You are a helpful AI assistant. Please analyze the following prompt for quality and effectiveness, providing specific feedback on improvements.

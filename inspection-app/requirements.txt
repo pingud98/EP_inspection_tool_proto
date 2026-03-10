@@ -1,0 +1,11 @@
+# EP Inspection Tool Requirements
+
+# Python version
+python>=3.8
+
+# Core dependencies
+numpy>=1.21.0
+pandas>=1.3.0
+
+# For CLI interface
+click>=8.0.0
