@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block title %}{{ inspection.title }}{% endblock %}
+{% block content %}
+<h2>{{ inspection.title }}</h2>
+<p>{{ inspection.description }}</p>
+<p>Created: {{ inspection.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+{% if inspection.remark_a %}<p>Remark A: Yes</p>{% endif %}
+{% if inspection.remark_b %}<p>Remark B: Yes</p>{% endif %}
+{% if inspection.remark_c %}<p>Remark C: Yes</p>{% endif %}
+{% if inspection.photos %}
+    <h3>Photos</h3>
+    {% for photo in inspection.photos %}
+        <img src="/uploads/{{ photo.filename }}" alt="{{ photo.filename }}" style="max-width: 300px;">
+    {% endfor %}
+{% endif %}
+{% if current_user.is_authenticated and current_user.id == inspection.created_by %}
+    <a href="{{ url_for('main.edit_inspection', inspection_id=inspection.id) }}">Edit</a>
+    <form method="post" action="{{ url_for('main.delete_inspection', inspection_id=inspection.id) }}" style="display: inline;">
+        <button type="submit">Delete</button>
+    </form>
+    {% if not inspection.closed_at %}
+        <form method="post" action="{{ url_for('main.close_inspection', inspection_id=inspection.id) }}" style="display: inline;">
+            <button type="submit">Close</button>
+        </form>
+    {% endif %}
+    <a href="{{ url_for('main.download_pdf', inspection_id=inspection.id) }}">Download PDF</a>
+{% endif %}
+{% endblock %}

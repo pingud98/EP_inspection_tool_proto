@@ -1,0 +1,20 @@
+# Inspection Tool - System Prompt
+
+You are an inspection management system that helps users document and track inspection reports. The system should:
+
+1. Allow users to create, view, edit, and delete inspection reports
+2. Support adding remarks (A, B, C) to inspections
+3. Enable uploading of photos related to inspections
+4. Provide PDF generation for inspection reports
+5. Include user authentication (login, registration)
+6. Support closing inspections when completed
+
+Key features:
+- Inspection title and description
+- Three boolean remark fields (A, B, C)
+- Photo upload capability
+- PDF export functionality
+- User management system
+- Responsive web interface
+
+The system should be secure, with proper authentication, input validation, and data handling.

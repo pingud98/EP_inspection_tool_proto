@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+{% block title %}{{ action }} Inspection{% endblock %}
+{% block content %}
+<h2>{{ action }} Inspection</h2>
+<form method="post" enctype="multipart/form-data">{{ form.hidden_tag() }}
+    <div>{{ form.title.label }} {{ form.title() }}</div>
+    <div>{{ form.description.label }} {{ form.description() }}</div>
+    <div>{{ form.remark_a.label }} {{ form.remark_a() }}</div>
+    <div>{{ form.remark_b.label }} {{ form.remark_b() }}</div>
+    <div>{{ form.remark_c.label }} {{ form.remark_c() }}</div>
+    <div>{{ form.photos.label }} {{ form.photos() }}</div>
+    <div>{{ form.submit() }}</div>
+</form>
+{% endblock %}

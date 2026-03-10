@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block title %}Inspections{% endblock %}
+{% block content %}
+<h2>Inspections</h2>
+{% if current_user.is_authenticated %}
+    <a href="{{ url_for('main.create_inspection') }}">Create New Inspection</a>
+{% endif %}
+{% for inspection in inspections %}
+    <div class="inspection">
+        <h3>{{ inspection.title }}</h3>
+        <p>{{ inspection.description[:100] }}{% if inspection.description|length > 100 %}...{% endif %}</p>
+        <p>Created: {{ inspection.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+        <a href="{{ url_for('main.detail', inspection_id=inspection.id) }}">View Details</a>
+    </div>
+{% endfor %}
+{% endblock %}
