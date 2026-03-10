@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}{% if user %}Edit User -{% else %}Add User -{% endif %} Admin - Inspection Reporting Tool{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
+    <h1 class="text-xl font-bold text-gray-800 mb-6">
+        {% if user %}Edit User{% else %}Add New User{% endif %}
+    </h1>
+    
+    <form method="POST" class="space-y-6">
+        {{ form.hidden_tag() }}
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                {{ form.username.label(class="block text-sm font-medium text-gray-700") }}
+                {{ form.username(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500") }}
+            </div>
+            
+            <div>
+                {{ form.full_name.label(class="block text-sm font-medium text-gray-700") }}
+                {{ form.full_name(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500") }}
+            </div>
+            
+            <div>
+                {{ form.email.label(class="block text-sm font-medium text-gray-700") }}
+                {{ form.email(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500") }}
+            </div>
+            
+            <div>
+                {{ form.is_admin.label(class="block text-sm font-medium text-gray-700") }}
+                {{ form.is_admin(class="mt-1") }}
+                <p class="mt-1 text-sm text-gray-500">Check if this user should have administrator privileges</p>
+            </div>
+            
+            <div>
+                {{ form.is_active.label(class="block text-sm font-medium text-gray-700") }}
+                {{ form.is_active(class="mt-1") }}
+                <p class="mt-1 text-sm text-gray-500">Check if this user account is active</p>
+            </div>
+            
+            <div>
+                {{ form.password.label(class="block text-sm font-medium text-gray-700") }}
+                {{ form.password(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500") }}
+                <p class="mt-1 text-sm text-gray-500">Leave blank to keep existing password</p>
+            </div>
+        </div>
+        
+        <div class="flex justify-end space-x-3">
+            <a href="{{ url_for('admin.users') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                Cancel
+            </a>
+            {{ form.submit(class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500") }}
+        </div>
+    </form>
+</div>
+{% endblock %}
