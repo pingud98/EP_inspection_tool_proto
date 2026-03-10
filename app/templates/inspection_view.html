@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Inspection Report {{ inspection.reference_number }} - Inspection Reporting Tool{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
+    <div class="flex justify-between items-start mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Inspection Report</h1>
+            <p class="text-gray-600">Reference: {{ inspection.reference_number }} | Version: {{ inspection.version }}</p>
+        </div>
+        <div class="flex space-x-3">
+            <a href="{{ url_for('inspections.inspection_edit', id=inspection.id) }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <i class="fas fa-edit mr-2"></i> Edit Report
+            </a>
+            <a href="{{ url_for('export.export_pdf', id=inspection.id) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <i class="fas fa-file-pdf mr-2"></i> Export PDF
+            </a>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Installation Details</h3>
+            <div class="space-y-2">
+                <p><span class="font-medium">Installation Name:</span> {{ inspection.installation_name }}</p>
+                <p><span class="font-medium">Location:</span> {{ inspection.location }}</p>
+                <p><span class="font-medium">Date of Inspection:</span> {{ inspection.inspection_date.strftime('%Y-%m-%d') }}</p>
+            </div>
+        </div>
+        
+        <div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Inspector(s)</h3>
+            <div class="space-y-2">
+                {% for inspector in inspection.inspectors %}
+                <p>{{ inspector.free_text_name or inspector.user.full_name }}</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="mb-8">
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Observations</h3>
+        <div class="bg-gray-50 p-4 rounded-lg">
+            {{ inspection.observations or "No observations recorded." }}
+        </div>
+    </div>
+    
+    {% if inspection.photos %}
+    <div class="mb-8">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Photos</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for photo in inspection.photos %}
+            <div class="border rounded-lg p-3">
+                <img src="/uploads/{{ photo.filename }}" alt="{{ photo.caption }}" class="w-full h-48 object-cover rounded mb-2">
+                <div class="text-sm">
+                    <p><span class="font-medium">Caption:</span> {{ photo.caption or "No caption" }}</p>
+                    <p><span class="font-medium">Action Required:</span> 
+                        <span class="px-2 py-1 rounded-full text-xs font-medium 
+                            {% if photo.action_required == 'none' %}bg-green-100 text-green-800
+                            {% elif photo.action_required == 'urgent' %}bg-red-100 text-red-800
+                            {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                            {{ photo.action_required.replace('_', ' ') | title }}
+                        </span>
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Conclusion</h3>
+        <div class="space-y-4">
+            <div>
+                <p><span class="font-medium">Conclusion Comments:</span></p>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    {{ inspection.conclusion_text or "No conclusion comments recorded." }}
+                </div>
+            </div>
+            
+            <div>
+                <p><span class="font-medium">Conclusion Status:</span></p>
+                <div class="mt-2 px-4 py-3 rounded-lg 
+                    {% if inspection.conclusion_status == 'ok' %}bg-green-100 text-green-800
+                    {% elif inspection.conclusion_status == 'minor' %}bg-yellow-100 text-yellow-800
+                    {% else %}bg-red-100 text-red-800{% endif %}">
+                    {{ inspection.conclusion_status.replace('_', ' ') | title }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

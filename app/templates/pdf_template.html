@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Inspection Report - {{ inspection.reference_number }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+            @bottom-center {
+                content: "Page " counter(page) " of " counter(pages);
+                font-size: 10pt;
+            }
+        }
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11pt;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20pt;
+            border-bottom: 1pt solid #000;
+            padding-bottom: 10pt;
+        }
+        .section {
+            margin-bottom: 20pt;
+        }
+        .section-title {
+            font-size: 14pt;
+            font-weight: bold;
+            margin-bottom: 10pt;
+            border-bottom: 1pt solid #000;
+            padding-bottom: 5pt;
+        }
+        .field-row {
+            display: flex;
+            margin-bottom: 8pt;
+        }
+        .field-label {
+            width: 30%;
+            font-weight: bold;
+        }
+        .field-value {
+            width: 70%;
+        }
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10pt;
+            margin-top: 10pt;
+        }
+        .photo-item {
+            page-break-inside: avoid;
+        }
+        .photo-caption {
+            font-size: 9pt;
+            margin-top: 5pt;
+        }
+        .action-required {
+            display: inline-block;
+            padding: 2pt 6pt;
+            border-radius: 4pt;
+            font-size: 8pt;
+            font-weight: bold;
+            margin-top: 3pt;
+        }
+        .action-none {
+            background-color: #d1f7d1;
+            color: #228b22;
+        }
+        .action-urgent {
+            background-color: #ffd1d1;
+            color: #b22222;
+        }
+        .action-before-next {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .conclusion-status {
+            padding: 8pt;
+            border-radius: 4pt;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 10pt;
+        }
+        .status-ok {
+            background-color: #d1f7d1;
+            color: #228b22;
+        }
+        .status-minor {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-major {
+            background-color: #ffd1d1;
+            color: #b22222;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Inspection Report</h1>
+        <p>Reference: {{ inspection.reference_number }} | Version: {{ inspection.version }} | Generated: {{ moment().format('YYYY-MM-DD HH:mm') }}</p>
+    </div>
+    
+    <div class="section">
+        <div class="section-title">Installation Details</div>
+        <div class="field-row">
+            <div class="field-label">Installation Name:</div>
+            <div class="field-value">{{ inspection.installation_name }}</div>
+        </div>
+        <div class="field-row">
+            <div class="field-label">Location:</div>
+            <div class="field-value">{{ inspection.location }}</div>
+        </div>
+        <div class="field-row">
+            <div class="field-label">Date of Inspection:</div>
+            <div class="field-value">{{ inspection.inspection_date.strftime('%Y-%m-%d') }}</div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="section-title">Inspectors</div>
+        <div class="field-row">
+            <div class="field-label">Inspector(s):</div>
+            <div class="field-value">
+                {% for inspector in inspection.inspectors %}
+                    {{ inspector.free_text_name or inspector.user.full_name }}{% if not loop.last %}, {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="section-title">Observations</div>
+        <div class="field-value">
+            {% if inspection.observations %}
+                {{ inspection.observations }}
+            {% else %}
+                <em>No observations recorded.</em>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if inspection.photos %}
+    <div class="section">
+        <div class="section-title">Photos</div>
+        <div class="photo-grid">
+            {% for photo in inspection.photos %}
+            <div class="photo-item">
+                <img src="{{ request.url_root }}uploads/{{ photo.filename }}" alt="{{ photo.caption }}" style="width: 100%; height: auto;">
+                <div class="photo-caption">
+                    <strong>Caption:</strong> {{ photo.caption or "No caption" }}<br>
+                    <strong>Action Required:</strong> 
+                    <span class="action-required action-{{ photo.action_required }}">
+                        {{ photo.action_required.replace('_', ' ') | title }}
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="section">
+        <div class="section-title">Conclusion</div>
+        <div class="field-row">
+            <div class="field-label">Conclusion Comments:</div>
+            <div class="field-value">
+                {% if inspection.conclusion_text %}
+                    {{ inspection.conclusion_text }}
+                {% else %}
+                    <em>No conclusion comments recorded.</em>
+                {% endif %}
+            </div>
+        </div>
+        <div class="field-row">
+            <div class="field-label">Conclusion Status:</div>
+            <div class="field-value">
+                <div class="conclusion-status status-{{ inspection.conclusion_status }}">
+                    {{ inspection.conclusion_status.replace('_', ' ') | title }}
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
