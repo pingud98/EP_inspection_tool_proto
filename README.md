@@ -24,6 +24,10 @@ A web application for inspection reporting and management built with Flask and S
 2. Run setup script: `python setup.py`
 3. Run the application: `python run.py`
 
+## Testing
+
+Run tests with: `python tests.py`
+
 ## Usage
 
 1. Start the server: `python run.py`

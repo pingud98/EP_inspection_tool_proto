@@ -1,191 +1,136 @@
 {% extends "base.html" %}
 
-{% block title %}{% if inspection %}Edit Inspection -{% else %}New Inspection -{% endif %} Inspection Reporting Tool{% endblock %}
+{% block title %}{{ title }} - Inspection Reporting Tool{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
-    <h1 class="text-xl font-bold text-gray-800 mb-6">
-        {% if inspection %}Edit Inspection Report{% else %}New Inspection Report{% endif %}
-    </h1>
-    
-    <form method="POST" class="space-y-8" id="inspectionForm">
-        {{ form.hidden_tag() }}
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-                {{ form.installation_name.label(class="block text-sm font-medium text-gray-700") }}
-                {{ form.installation_name(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500") }}
-            </div>
-            
-            <div>
-                {{ form.location.label(class="block text-sm font-medium text-gray-700") }}
-                {{ form.location(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500") }}
-            </div>
-            
-            <div>
-                {{ form.inspection_date.label(class="block text-sm font-medium text-gray-700") }}
-                {{ form.inspection_date(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500") }}
-            </div>
-            
-            <div>
-                {{ form.reference_number.label(class="block text-sm font-medium text-gray-700") }}
-                {{ form.reference_number(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500") }}
-            </div>
-        </div>
-        
-        <div>
-            {{ form.observations.label(class="block text-sm font-medium text-gray-700") }}
-            {{ form.observations(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500", rows="4") }}
-        </div>
-        
-        <div>
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Inspectors</h3>
-            <div id="inspectors-container" class="space-y-2">
-                {% for inspector in form.inspectors %}
-                <div class="flex items-center">
-                    {{ inspector(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500") }}
-                    <button type="button" class="ml-2 text-red-600 hover:text-red-800 remove-inspector">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                {% endfor %}
-            </div>
-            <button type="button" id="add-inspector" class="mt-2 inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                <i class="fas fa-plus mr-1"></i> Add Inspector
-            </button>
-        </div>
-        
-        <div>
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Photos</h3>
-            <div id="photos-container" class="space-y-4">
-                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                    <div class="flex items-center justify-center">
-                        <i class="fas fa-cloud-upload-alt text-3xl text-gray-400"></i>
-                        <p class="ml-2 text-gray-500">Upload photos</p>
-                    </div>
-                    <input type="file" id="photo-upload-input" class="hidden" multiple accept="image/*">
-                    <button type="button" id="upload-photo-btn" class="mt-2 inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Select Photos
-                    </button>
-                </div>
-                <div id="photo-thumbnails" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-            </div>
-        </div>
-        
-        <div>
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Conclusion</h3>
-            <div class="space-y-4">
-                {{ form.conclusion_text.label(class="block text-sm font-medium text-gray-700") }}
-                {{ form.conclusion_text(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500", rows="3") }}
-                
-                <div>
-                    {{ form.conclusion_status.label(class="block text-sm font-medium text-gray-700") }}
-                    <div class="mt-2 space-y-2">
-                        {% for choice in form.conclusion_status.choices %}
-                        <div class="flex items-center">
-                            <input type="radio" id="status-{{ choice[0] }}" name="conclusion_status" value="{{ choice[0] }}" 
-                                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" {% if form.conclusion_status.data == choice[0] %}checked{% endif %}>
-                            <label for="status-{{ choice[0] }}" class="ml-3 block text-sm text-gray-700">
-                                {{ choice[1] }}
-                            </label>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="flex justify-end space-x-3">
-            {% if inspection %}
-            <a href="{{ url_for('inspections.inspection_view', id=inspection.id) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                Cancel
-            </a>
-            {{ form.update(class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500") }}
-            {% else %}
-            <a href="{{ url_for('inspections.dashboard') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                Cancel
-            </a>
-            {{ form.submit(class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500") }}
-            {% endif %}
-        </div>
-    </form>
+<div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">{{ title }}</h1>
 </div>
 
-<script>
-// Add inspector functionality
-document.addEventListener('DOMContentLoaded', function() {
-    const container = document.getElementById('inspectors-container');
-    const addInspectorBtn = document.getElementById('add-inspector');
+<form method="POST" enctype="multipart/form-data" class="space-y-6">
+    {{ form.hidden_tag() }}
     
-    addInspectorBtn.addEventListener('click', function() {
-        const newInspector = document.createElement('div');
-        newInspector.className = 'flex items-center';
-        newInspector.innerHTML = `
-            <input type="text" name="inspectors" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
-            <button type="button" class="ml-2 text-red-600 hover:text-red-800 remove-inspector">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-        container.appendChild(newInspector);
-    });
+    <div class="card">
+        <div class="card-header">
+            <h2 class="text-xl font-semibold text-gray-900">Inspection Details</h2>
+        </div>
+        <div class="card-body">
+            <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                <div class="sm:col-span-3">
+                    {{ form.inspection_date.label(class="block text-sm font-medium text-gray-700 mb-1") }}
+                    {{ form.inspection_date(class="form-input") }}
+                    {% if form.inspection_date.errors %}
+                        <ul class="mt-2 text-sm text-red-600">
+                            {% for error in form.inspection_date.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                
+                <div class="sm:col-span-3">
+                    {{ form.inspection_type.label(class="block text-sm font-medium text-gray-700 mb-1") }}
+                    {{ form.inspection_type(class="form-input") }}
+                    {% if form.inspection_type.errors %}
+                        <ul class="mt-2 text-sm text-red-600">
+                            {% for error in form.inspection_type.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                
+                <div class="sm:col-span-6">
+                    {{ form.installation_name.label(class="block text-sm font-medium text-gray-700 mb-1") }}
+                    {{ form.installation_name(class="form-input") }}
+                    {% if form.installation_name.errors %}
+                        <ul class="mt-2 text-sm text-red-600">
+                            {% for error in form.installation_name.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                
+                <div class="sm:col-span-6">
+                    {{ form.location.label(class="block text-sm font-medium text-gray-700 mb-1") }}
+                    {{ form.location(class="form-input") }}
+                    {% if form.location.errors %}
+                        <ul class="mt-2 text-sm text-red-600">
+                            {% for error in form.location.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                
+                <div class="sm:col-span-3">
+                    {{ form.version.label(class="block text-sm font-medium text-gray-700 mb-1") }}
+                    {{ form.version(class="form-input") }}
+                    {% if form.version.errors %}
+                        <ul class="mt-2 text-sm text-red-600">
+                            {% for error in form.version.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                
+                <div class="sm:col-span-3">
+                    {{ form.reference_number.label(class="block text-sm font-medium text-gray-700 mb-1") }}
+                    {{ form.reference_number(class="form-input") }}
+                    {% if form.reference_number.errors %}
+                        <ul class="mt-2 text-sm text-red-600">
+                            {% for error in form.reference_number.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
     
-    // Remove inspector functionality
-    container.addEventListener('click', function(e) {
-        if (e.target.closest('.remove-inspector')) {
-            const parent = e.target.closest('.flex');
-            parent.remove();
-        }
-    });
+    <div class="card">
+        <div class="card-header">
+            <h2 class="text-xl font-semibold text-gray-900">Inspection Results</h2>
+        </div>
+        <div class="card-body">
+            <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                <div class="sm:col-span-6">
+                    {{ form.conclusion_status.label(class="block text-sm font-medium text-gray-700 mb-1") }}
+                    {{ form.conclusion_status(class="form-input") }}
+                    {% if form.conclusion_status.errors %}
+                        <ul class="mt-2 text-sm text-red-600">
+                            {% for error in form.conclusion_status.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                
+                <div class="sm:col-span-6">
+                    {{ form.comments.label(class="block text-sm font-medium text-gray-700 mb-1") }}
+                    {{ form.comments(class="form-textarea") }}
+                    {% if form.comments.errors %}
+                        <ul class="mt-2 text-sm text-red-600">
+                            {% for error in form.comments.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
     
-    // Photo upload functionality
-    const uploadBtn = document.getElementById('upload-photo-btn');
-    const photoInput = document.getElementById('photo-upload-input');
-    const photoThumbnails = document.getElementById('photo-thumbnails');
-    
-    uploadBtn.addEventListener('click', function() {
-        photoInput.click();
-    });
-    
-    photoInput.addEventListener('change', function(e) {
-        const files = e.target.files;
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            const formData = new FormData();
-            formData.append('file', file);
-            
-            fetch('/upload_photo', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.filename) {
-                    const thumbnail = document.createElement('div');
-                    thumbnail.className = 'border rounded-lg p-2';
-                    thumbnail.innerHTML = `
-                        <img src="/uploads/${data.filename}" alt="${data.original_filename}" class="w-full h-32 object-cover rounded">
-                        <div class="mt-2">
-                            <input type="hidden" name="photo_filenames" value="${data.filename}">
-                            <input type="text" name="photo_captions" placeholder="Caption" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
-                            <select name="photo_actions" class="w-full px-2 py-1 border border-gray-300 rounded text-sm mt-1">
-                                <option value="none">No action required</option>
-                                <option value="urgent">Urgent action required</option>
-                                <option value="before_next">Action required before next inspection</option>
-                            </select>
-                        </div>
-                    `;
-                    photoThumbnails.appendChild(thumbnail);
-                } else {
-                    alert('Upload failed: ' + (data.error || 'Unknown error'));
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Upload failed');
-            });
-        }
-        photoInput.value = '';
-    });
-});
-</script>
+    <div class="flex justify-end space-x-3">
+        <button type="submit" class="btn btn-primary">
+            Save
+        </button>
+        <a href="{{ url_for('inspections.dashboard') }}" class="btn btn-outline">
+            Cancel
+        </a>
+    </div>
+</form>
 {% endblock %}

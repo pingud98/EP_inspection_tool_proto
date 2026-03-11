@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+from sqlalchemy import CheckConstraint
 
 db = SQLAlchemy()
 
@@ -13,6 +14,12 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(120), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    __table_args__ = (
+        CheckConstraint('length(username) >= 3', name='username_length_check'),
+        CheckConstraint('length(full_name) >= 2', name='full_name_length_check'),
+        CheckConstraint('length(email) >= 5', name='email_length_check'),
+    )
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password, salt_length=12)
@@ -55,6 +62,13 @@ class Inspection(db.Model):
     inspectors = db.relationship('InspectionInspector', backref='inspection', lazy=True)
     photos = db.relationship('Photo', backref='inspection', lazy=True)
     
+    __table_args__ = (
+        CheckConstraint('length(installation_name) >= 3', name='installation_name_length_check'),
+        CheckConstraint('length(location) >= 2', name='location_length_check'),
+        CheckConstraint('version >= 1', name='version_positive_check'),
+        CheckConstraint('reference_number >= 1', name='reference_number_positive_check'),
+    )
+    
     def __repr__(self):
         return f'<Inspection {self.reference_number} - {self.installation_name}>'
 
@@ -77,6 +91,10 @@ class Photo(db.Model):
     caption = db.Column(db.Text)
     action_required = db.Column(db.Enum('none', 'urgent', 'before_next'), nullable=False)
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    __table_args__ = (
+        CheckConstraint('length(filename) >= 5', name='filename_length_check'),
+    )
     
     def __repr__(self):
         return f'<Photo {self.filename}>'

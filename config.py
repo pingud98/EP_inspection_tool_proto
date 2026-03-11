@@ -13,8 +13,8 @@ class Config:
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
     
     # Self-signed certificate paths
-    CERT_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'certs', 'cert.pem')
-    KEY_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'certs', 'key.pem')
+    CERT_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'certs', 'certificate.crt')
+    KEY_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'certs', 'private.key')
     
     # Logo configuration
     LOGO_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'uploads', 'logo.png')

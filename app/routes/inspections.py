@@ -203,11 +203,4 @@ def upload_photo():
 def allowed_file(filename):
     """Check if file extension is allowed"""
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-    if not filename:
-        return False
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-def allowed_file(filename):
-    """Check if file extension is allowed"""
-    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
