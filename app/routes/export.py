@@ -4,6 +4,7 @@ from app.models import Inspection, InspectionInspector, Photo, User, db
 from weasyprint import HTML
 import os
 from datetime import datetime
+import io
 
 export_bp = Blueprint('export', __name__)
 

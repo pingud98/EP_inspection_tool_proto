@@ -73,21 +73,12 @@ def create_directories():
 def setup_database():
     """Initialize the database"""
     try:
+        # Import the actual config class and create app with it
+        from config import Config
         from app import create_app
         from app.models import db
         
-        # Create a simple config object
-        class DevelopmentConfig:
-            SECRET_KEY = 'dev-secret-key'
-            SQLALCHEMY_DATABASE_URI = 'sqlite:///app.db'
-            SQLALCHEMY_TRACK_MODIFICATIONS = False
-            UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'uploads')
-            MAX_CONTENT_LENGTH = 10 * 1024 * 1024
-            ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
-            CERT_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'certs', 'cert.pem')
-            KEY_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'certs', 'key.pem')
-        
-        app = create_app(DevelopmentConfig)
+        app = create_app(Config)
         
         with app.app_context():
             db.create_all()
@@ -98,21 +89,12 @@ def setup_database():
 def create_admin_user():
     """Create the default admin user"""
     try:
+        # Import the actual config class and create app with it
+        from config import Config
         from app import create_app
         from app.models import db, User
         
-        # Create a simple config object
-        class DevelopmentConfig:
-            SECRET_KEY = 'dev-secret-key'
-            SQLALCHEMY_DATABASE_URI = 'sqlite:///app.db'
-            SQLALCHEMY_TRACK_MODIFICATIONS = False
-            UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'uploads')
-            MAX_CONTENT_LENGTH = 10 * 1024 * 1024
-            ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
-            CERT_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'certs', 'cert.pem')
-            KEY_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'certs', 'key.pem')
-        
-        app = create_app(DevelopmentConfig)
+        app = create_app(Config)
         
         with app.app_context():
             # Check if admin user already exists
@@ -121,6 +103,7 @@ def create_admin_user():
                 # Create admin user
                 admin_user = User(
                     username='admin',
+                    full_name='Administrator',
                     email='admin@example.com',
                     is_admin=True
                 )
