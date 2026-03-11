@@ -5,41 +5,39 @@ from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, DateField, IntegerField, SelectField, SubmitField, FieldList, FormField
+from wtforms import StringField, TextAreaField, DateField, IntegerField, SelectField, SubmitField, FieldList
 from wtforms.validators import DataRequired, Length, Optional
 
 inspections_bp = Blueprint('inspections', __name__)
 
-# Form for adding photos
-class PhotoForm(FlaskForm):
-    caption = StringField('Caption', validators=[Optional(), Length(max=200)])
-    action_required = SelectField('Action Required', choices=[
-        ('none', 'No action required'),
-        ('urgent', 'Urgent action required'),
-        ('before_next', 'Action required before next inspection')
-    ], validators=[DataRequired()])
-    file = StringField('File', validators=[DataRequired()])
-
-# Form for inspection
 class InspectionForm(FlaskForm):
+    # Basic inspection information
     installation_name = StringField('Installation Name', validators=[DataRequired(), Length(max=200)])
     location = StringField('Location', validators=[DataRequired(), Length(max=200)])
-    inspection_date = DateField('Date of Inspection', validators=[DataRequired()])
+    inspection_date = DateField('Inspection Date', validators=[DataRequired()])
     reference_number = IntegerField('Reference Number', validators=[DataRequired()])
+    
+    # Observations
     observations = TextAreaField('Observations')
-    conclusion_text = TextAreaField('Conclusion Comments')
-    conclusion_status = SelectField('Conclusion Status', choices=[
-        ('ok', 'OK for operation in current state'),
-        ('minor', 'Minor comments — Remedial actions required for continued operation'),
-        ('major', 'Major comments — Operation suspended until resolution and satisfactory follow-up inspection')
-    ], validators=[DataRequired()])
-    inspectors = FieldList(StringField('Inspector', validators=[Optional(), Length(max=120)]), min_entries=1)
-    photos = FieldList(FormField(PhotoForm), min_entries=0)
-    submit = SubmitField('Complete Report')
-    update = SubmitField('Update Report')
-    cancel = SubmitField('Cancel')
+    
+    # Inspectors (multiple fields)
+    inspectors = FieldList(StringField('Inspector'), min_entries=1)
+    
+    # Conclusion
+    conclusion_text = TextAreaField('Conclusion Text')
+    conclusion_status = SelectField('Conclusion Status', 
+                                   choices=[('ok', 'OK'), ('minor', 'Minor Issue'), ('major', 'Major Issue')],
+                                   validators=[DataRequired()])
+    
+    # Submit button
+    submit = SubmitField('Save Inspection')
+    update = SubmitField('Update Inspection')
 
 @inspections_bp.route('/')
+def index():
+    return redirect(url_for('auth.login'))
+
+@inspections_bp.route('/dashboard')
 @login_required
 def dashboard():
     # Get all inspections for the current user
@@ -111,13 +109,21 @@ def inspection_edit(id):
     
     # Pre-fill inspectors with existing inspectors
     if inspection.inspectors:
-        form.inspectors.process_data([inspector.free_text_name or inspector.user.full_name 
-                                    for inspector in inspection.inspectors if inspector.free_text_name or inspector.user])
-    
-    # Pre-fill photos
-    if inspection.photos:
-        for photo in inspection.photos:
-            form.photos.append_entry(photo)
+        inspector_names = []
+        for inspector in inspection.inspectors:
+            if inspector.free_text_name:
+                inspector_names.append(inspector.free_text_name)
+            elif inspector.user:
+                inspector_names.append(inspector.user.full_name)
+        # Fill the first inspector field
+        if inspector_names:
+            form.inspectors[0].data = inspector_names[0]
+            # Add additional fields if needed
+            while len(form.inspectors) < len(inspector_names):
+                form.inspectors.append_entry()
+            # Fill remaining fields
+            for i, name in enumerate(inspector_names[1:], 1):
+                form.inspectors[i].data = name
     
     if form.validate_on_submit():
         # Update inspection
@@ -179,14 +185,29 @@ def upload_photo():
     if file.filename == '':
         return jsonify({'error': 'No file selected'}), 400
     
-    if file:
+    if file and file.filename and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         if filename:
             # Generate unique filename
             import uuid
             unique_filename = f"{uuid.uuid4().hex}_{filename}"
-            file_path = os.path.join('uploads', unique_filename)
+            # Create uploads directory if it doesn't exist
+            upload_dir = 'uploads'
+            os.makedirs(upload_dir, exist_ok=True)
+            file_path = os.path.join(upload_dir, unique_filename)
             file.save(file_path)
             return jsonify({'filename': unique_filename, 'original_filename': filename})
     
     return jsonify({'error': 'Upload failed'}), 500
+
+def allowed_file(filename):
+    """Check if file extension is allowed"""
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+    if not filename:
+        return False
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def allowed_file(filename):
+    """Check if file extension is allowed"""
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
