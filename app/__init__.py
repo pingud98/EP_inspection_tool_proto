@@ -1,7 +1,7 @@
 import logging
 from logging.handlers import RotatingFileHandler
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
 from config import Config

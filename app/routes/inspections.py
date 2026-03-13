@@ -15,7 +15,11 @@ class InspectionForm(FlaskForm):
     installation_name = StringField('Installation Name', validators=[DataRequired(), Length(max=200)])
     location = StringField('Location', validators=[DataRequired(), Length(max=200)])
     inspection_date = DateField('Inspection Date', validators=[DataRequired()])
+    version = IntegerField('Version', validators=[DataRequired()], default=1)
     reference_number = IntegerField('Reference Number', validators=[DataRequired()])
+    
+    # General comments
+    general_comments = TextAreaField('General Comments')
     
     # Observations
     observations = TextAreaField('Observations')
@@ -62,8 +66,10 @@ def inspection_new():
             installation_name=form.installation_name.data,
             location=form.location.data,
             inspection_date=form.inspection_date.data,
+            version=form.version.data,
             reference_number=form.reference_number.data,
             observations=form.observations.data,
+            general_comments=form.general_comments.data,
             conclusion_text=form.conclusion_text.data,
             conclusion_status=form.conclusion_status.data,
             created_by_id=current_user.id
@@ -88,6 +94,31 @@ def inspection_new():
                         free_text_name=inspector
                     )
                 db.session.add(inspector_entry)
+        
+        # Handle photo uploads
+        if 'photos' in request.files:
+            files = request.files.getlist('photos')
+            for file in files:
+                if file and file.filename:
+                    filename = secure_filename(file.filename)
+                    if filename:
+                        # Generate unique filename
+                        import uuid
+                        unique_filename = f"{uuid.uuid4().hex}_{filename}"
+                        # Create uploads directory if it doesn't exist
+                        upload_dir = 'uploads'
+                        os.makedirs(upload_dir, exist_ok=True)
+                        file_path = os.path.join(upload_dir, unique_filename)
+                        file.save(file_path)
+                        
+                        # Create Photo record
+                        photo = Photo(
+                            inspection_id=inspection.id,
+                            filename=unique_filename,
+                            caption='',  # Default empty caption
+                            action_required='none'  # Default action required
+                        )
+                        db.session.add(photo)
         
         db.session.commit()
         flash('Inspection report created successfully.', 'success')
@@ -130,14 +161,12 @@ def inspection_edit(id):
         inspection.installation_name = form.installation_name.data
         inspection.location = form.location.data
         inspection.inspection_date = form.inspection_date.data
+        inspection.version = form.version.data
         inspection.reference_number = form.reference_number.data
         inspection.observations = form.observations.data
         inspection.conclusion_text = form.conclusion_text.data
         inspection.conclusion_status = form.conclusion_status.data
         inspection.updated_at = datetime.utcnow()
-        
-        # Increment version
-        inspection.version += 1
         
         # Update inspectors
         InspectionInspector.query.filter_by(inspection_id=inspection.id).delete()

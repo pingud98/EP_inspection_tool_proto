@@ -28,8 +28,6 @@
                     {% endif %}
                 </div>
                 
-
-                
                 <div class="sm:col-span-6">
                     {{ form.installation_name.label(class="block text-sm font-medium text-gray-700 mb-1") }}
                     {{ form.installation_name(class="form-input") }}
@@ -83,6 +81,42 @@
     
     <div class="card">
         <div class="card-header">
+            <h2 class="text-xl font-semibold text-gray-900">General Comments</h2>
+        </div>
+        <div class="card-body">
+            <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                <div class="sm:col-span-6">
+                    {{ form.general_comments.label(class="block text-sm font-medium text-gray-700 mb-1") }}
+                    {{ form.general_comments(class="form-textarea") }}
+                    {% if form.general_comments.errors %}
+                        <ul class="mt-2 text-sm text-red-600">
+                            {% for error in form.general_comments.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h2 class="text-xl font-semibold text-gray-900">Photo Upload</h2>
+        </div>
+        <div class="card-body">
+            <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                <div class="sm:col-span-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Upload Photos</label>
+                    <input type="file" id="photo-upload" name="photos" multiple accept="image/*" class="form-input">
+                    <p class="mt-1 text-sm text-gray-500">Select one or more images to upload</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
             <h2 class="text-xl font-semibold text-gray-900">Inspection Results</h2>
         </div>
         <div class="card-body">
@@ -100,11 +134,11 @@
                 </div>
                 
                 <div class="sm:col-span-6">
-                    {{ form.comments.label(class="block text-sm font-medium text-gray-700 mb-1") }}
-                    {{ form.comments(class="form-textarea") }}
-                    {% if form.comments.errors %}
+                    {{ form.conclusion_text.label(class="block text-sm font-medium text-gray-700 mb-1") }}
+                    {{ form.conclusion_text(class="form-textarea") }}
+                    {% if form.conclusion_text.errors %}
                         <ul class="mt-2 text-sm text-red-600">
-                            {% for error in form.comments.errors %}
+                            {% for error in form.conclusion_text.errors %}
                                 <li>{{ error }}</li>
                             {% endfor %}
                         </ul>
